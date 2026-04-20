@@ -2,6 +2,7 @@
 
 import WaveSurfer from "@wavesurfer/react";
 import { useState } from "react";
+import type WaveSurferInstance from "wavesurfer.js";
 
 interface Props {
   audioUrl: string;
@@ -9,9 +10,9 @@ interface Props {
 
 export default function WaveformPlayer({ audioUrl }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [wavesurfer, setWavesurfer] = useState<ReturnType<typeof WaveSurfer> | null>(null);
+  const [wavesurfer, setWavesurfer] = useState<WaveSurferInstance | null>(null);
 
-  const onReady = (ws: ReturnType<typeof WaveSurfer>) => {
+  const onReady = (ws: WaveSurferInstance) => {
     setWavesurfer(ws);
     setIsPlaying(false);
   };
