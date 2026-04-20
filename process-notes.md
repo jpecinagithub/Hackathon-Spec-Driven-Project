@@ -51,3 +51,14 @@
 - **Submission planning:** Wow moment = accurate transcriptions. GitHub repo initialized locally, push to GitHub included in manual submission steps.
 - **Deepening rounds:** 0 — Jon accepted the proposed sequence without changes.
 - **Active shaping:** Minimal — accepted the full sequencing proposal. Only input was removing the Devpost item and noting he'd handle submission manually.
+
+## /build
+
+- **Total items completed:** 10/10
+- **Build mode:** Autonomous, no checkpoints, single commit at end (by user)
+- **Items 1-4 (backend):** Dispatched via subagents. Scaffold, FastAPI+CORS+model loading, TTS endpoint, STT endpoint — all completed cleanly.
+- **Item 5 (frontend shell):** Subagent hit rate limit mid-execution before writing files. Files written directly by orchestrator.
+- **Items 6-10 (frontend components):** Written directly. All lib utilities (api.ts, pdfUtils.ts, pdfExport.ts) and components (VoiceSelector, FormatSelector, WaveformPlayer, AudioUploader, MicRecorder, TTSPanel, STTPanel) implemented.
+- **Notable decisions during build:** WaveSurfer imported with `dynamic(..., ssr: false)` in TTSPanel. PDF.js worker configured via CDN URL (avoids Next.js worker bundling issues). jsPDF used for transcription export with A4 layout and word-wrapping.
+- **Checklist revision:** None required — spec was clean enough to build straight through.
+- **Pending:** User needs to run `pip install -r backend/requirements.txt`, then test both endpoints. First backend startup will download Kokoro and Whisper models (~1-2 min). Verify WebM/libopus ffmpeg support on Oracle before deploying.

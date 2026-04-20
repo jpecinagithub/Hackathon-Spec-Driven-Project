@@ -36,37 +36,37 @@
   Acceptance: See `prd.md > Speech to Text`. Uploading an audio file returns a JSON object with the transcription text. English speech is correctly transcribed.
   Verify: Use curl to send `POST /api/stt` with a short WAV or MP3 file containing English speech. The response JSON contains accurate transcription text. Test with a short recorded sentence — confirm the text matches what was said.
 
-- [ ] **5. Frontend app shell + tab navigation**
+- [x] **5. Frontend app shell + tab navigation**
   Spec ref: `spec.md > Frontend > app/page.tsx`, `spec.md > Frontend > app/layout.tsx`
   What to build: Write `app/layout.tsx` with root layout, metadata (`title: "VoiceForge"`), and Tailwind globals. Write `app/page.tsx` with `activeTab: "tts" | "stt"` state (default `"tts"`), a top navigation bar with two buttons ("Text to Speech" and "Speech to Text"), and conditional rendering of `<TTSPanel />` or `<STTPanel />` based on the active tab. Active tab is visually indicated (e.g., bottom border or background highlight using Tailwind). Layout is responsive — works on mobile and desktop. Create empty `TTSPanel.tsx` and `STTPanel.tsx` components that just render a placeholder div so the page loads without errors.
   Acceptance: See `prd.md > App Navigation`. The top nav shows two tabs. Clicking each tab switches the active view and updates the visual indicator. Renders correctly on mobile viewport.
   Verify: Run `npm run dev`. Open `http://localhost:3000`. Two tabs visible. Click each — active state updates. Resize browser to mobile width — layout remains clean.
 
-- [ ] **6. TTS Panel — full UI with WaveSurfer player and audio download**
+- [x] **6. TTS Panel — full UI with WaveSurfer player and audio download**
   Spec ref: `spec.md > Frontend > components/TTSPanel.tsx`, `spec.md > Frontend > components/WaveformPlayer.tsx`, `spec.md > Frontend > components/VoiceSelector.tsx`, `spec.md > Frontend > components/FormatSelector.tsx`, `spec.md > Frontend > lib/api.ts`
   What to build: Implement `lib/api.ts` with `callTTS(text, voiceId, format)` — sends `POST` to `${NEXT_PUBLIC_API_URL}/api/tts` with JSON body, returns audio Blob on success, throws Error on non-2xx. Implement `VoiceSelector.tsx` with 4 hardcoded options (af_heart/Heart Female, af_bella/Bella Female, am_fenrir/Fenrir Male, am_michael/Michael Male). Implement `FormatSelector.tsx` with MP3/WAV/WebM options, positioned bottom-right. Implement `WaveformPlayer.tsx` wrapping `@wavesurfer/react` — loads `audioUrl` prop, shows waveform + play/pause. Implement full `TTSPanel.tsx`: textarea, VoiceSelector, FormatSelector, Generate button (no-op when text empty), spinner while generating, WaveformPlayer + download button on success, error message on failure. Import WaveformPlayer with `dynamic(..., { ssr: false })`.
   Acceptance: See `prd.md > Text to Speech`. Type text, select voice and format, click Generate — spinner appears, then waveform player loads with generated audio. Clicking download saves the file in the selected format. Empty textarea → Generate does nothing. Backend error → error message shown.
   Verify: With backend running, type "Hello world" in the TTS panel, select "Heart (Female)" and "MP3", click Generate. Spinner appears, then waveform renders. Click play — audio plays. Click download — MP3 file downloads. Clear the textarea and click Generate — nothing happens.
 
-- [ ] **7. TTS PDF import — PDF.js text extraction**
+- [x] **7. TTS PDF import — PDF.js text extraction**
   Spec ref: `spec.md > Frontend > lib/pdfUtils.ts`
   What to build: Write `lib/pdfUtils.ts` with `extractTextFromPDF(file: File): Promise<string>` using `pdfjs-dist`. Configure the PDF.js worker (set `GlobalWorkerOptions.workerSrc` to the CDN or local path). The function loads the PDF, iterates all pages, extracts text content, and returns the concatenated text. Add an "Import PDF" button to `TTSPanel.tsx` next to the textarea that opens a file picker (accept `.pdf`), calls `extractTextFromPDF()`, and sets the textarea value. Show an inline error message if extraction fails or the PDF is empty.
   Acceptance: See `prd.md > Text to Speech` (PDF import story). Clicking "Import PDF" opens a file picker. Selecting a valid PDF populates the textarea with the extracted text. Selecting a corrupt or empty PDF shows an error message.
   Verify: Import a PDF with known text — confirm the extracted text appears correctly in the textarea. Try generating TTS from that imported text — confirm audio is generated successfully.
 
-- [ ] **8. STT Panel — audio upload + transcribe + text display**
+- [x] **8. STT Panel — audio upload + transcribe + text display**
   Spec ref: `spec.md > Frontend > components/STTPanel.tsx`, `spec.md > Frontend > components/AudioUploader.tsx`, `spec.md > Frontend > lib/api.ts`
   What to build: Implement `callSTT(audioFile)` in `lib/api.ts` — sends `POST` to `${NEXT_PUBLIC_API_URL}/api/stt` as FormData with the audio file, returns `{ text: string }` on success, throws Error on non-2xx. Implement `AudioUploader.tsx` — file input accepting MP3/WAV/WebM, shows inline error on unsupported format, calls callback with the selected file. Implement `STTPanel.tsx`: `AudioUploader` at the top (MicRecorder placeholder next to it for now), Transcribe button (no-op when no file), spinner while transcribing, transcription output in a read-only textarea, error message on failure. "Download PDF" button visible only when transcription is non-empty (placeholder for now — wired up in step 10).
   Acceptance: See `prd.md > Speech to Text`. Upload an MP3/WAV/WebM file, click Transcribe — spinner appears, then transcription text is shown. Empty state (no file) → Transcribe does nothing. Unsupported format → inline error.
   Verify: With backend running, upload a short audio file with English speech. Click Transcribe. Confirm transcription appears in the text area and is accurate. Try uploading a .txt file — confirm unsupported format error appears.
 
-- [ ] **9. Microphone recorder — MediaRecorder integration**
+- [x] **9. Microphone recorder — MediaRecorder integration**
   Spec ref: `spec.md > Frontend > components/MicRecorder.tsx`
   What to build: Implement `MicRecorder.tsx` using the browser `MediaRecorder` API. On record button click: call `navigator.mediaDevices.getUserMedia({ audio: true })`. If permission denied: show error message "Microphone access denied." If granted: start recording, change button to "Stop" state with a red indicator. On stop: collect recorded chunks into a Blob (type `audio/webm`), create a `File` from the Blob, pass it to `STTPanel` via callback to set as the active audio input (replaces any uploaded file). Wire `MicRecorder` into `STTPanel` next to `AudioUploader`.
   Acceptance: See `prd.md > Speech to Text` (microphone recording story). Record button visible alongside upload field. Clicking it requests mic permission. While recording: Stop button with red indicator shown. Clicking Stop ends recording and sets the audio for transcription. Clicking Transcribe after recording → transcription appears.
   Verify: Click the record button — browser prompts for mic permission. Grant it and speak a short sentence. Click Stop. Click Transcribe — confirm the speech is accurately transcribed. Test denying mic permission — confirm error message appears.
 
-- [ ] **10. Transcription PDF export**
+- [x] **10. Transcription PDF export**
   Spec ref: `spec.md > Frontend > lib/pdfExport.ts`
   What to build: Write `lib/pdfExport.ts` with `downloadTranscriptionAsPDF(text: string): void` using `jsPDF`. The function creates a jsPDF document, adds the transcription text with word-wrapping, and triggers a browser download as `transcription.pdf`. Wire the "Download PDF" button in `STTPanel.tsx` to call this function. The button should only be active (not greyed out) when `transcription` is non-empty.
   Acceptance: See `prd.md > Speech to Text` (PDF download story). After a transcription is generated, the "Download PDF" button becomes active. Clicking it downloads a `transcription.pdf` file containing the plain transcription text. The PDF is readable and the text is complete.
